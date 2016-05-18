@@ -1,5 +1,5 @@
 best <- function(state, outcomeName){
-  # Read the oucome data
+  # Read the outcome data
   outcome <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
   states <- outcome$State
   diseases <- c("heart attack","heart failure","pneumonia")
