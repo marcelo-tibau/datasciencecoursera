@@ -38,3 +38,25 @@ ggplot(total_ac_average, aes(interval, steps)) +
 ## Code to calculate the maximum number of steps
 max_number_steps <- which.max(total_ac_average$steps)
 print(total_ac_average[max_number_steps,])
+
+### Imputing missing values
+## Code to calculate the total number of missing values in the dataset.
+number_na <- sum(is.na(activity$steps))
+print(number_na)
+
+## Code to fill in all of the missing values in the dataset. 
+fill_na <- function(steps, interval) {
+        fill_ac <- NA
+        if (!is.na(steps))
+                fill_ac <- c(steps)
+        else
+                fill_ac <- (total_ac_average[total_ac_average$interval==interval, "steps"])
+        return(fill_ac)
+}
+
+## Code to create a new dataset with the missing data filled in.
+new_activity <- activity
+new_activity$steps <- mapply(fill_na, new_activity$steps, new_activity$interval)
+
+## Code to make a histogram of the total number of steps taken each day and to calculate the mean and median total number of steps taken per day.
+
