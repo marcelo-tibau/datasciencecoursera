@@ -42,3 +42,33 @@ dev.copy(png, file="fatalities_injuries.png", height=680, width=1040)
 dev.off()
 
 # Question 2: Across the United States, which types of events have the greatest economic consequences?
+## Data Processing
+### Code to sum the property damages per event type and order it by decreasing values.
+storm_property_dam <- aggregate(PROPDMG ~ EVTYPE, data = storm_data_optim, sum, na.rm = TRUE)
+names(storm_property_dam) <- c("EVENT_TYPE", "PROPERTY_DAMAGES")
+storm_property_dam <- storm_property_dam[order(-storm_property_dam$PROPERTY_DAMAGES), ]
+storm_property_dam$PROPERTY_DAMAGES <- storm_property_dam$PROPERTY_DAMAGES/10^6 
+
+### Code to sum the crop damages per event type and order it by decreasing values.
+storm_crop_dam <- aggregate(CROPDMG ~ EVTYPE, data = storm_data_optim, sum, na.rm = TRUE)
+names(storm_crop_dam) <- c("EVENT_TYPE", "CROP_DAMAGES")
+storm_crop_dam <- storm_crop_dam[order(-storm_crop_dam$CROP_DAMAGES), ]
+storm_crop_dam$CROP_DAMAGES <- storm_crop_dam$CROP_DAMAGES/10^6
+
+## Results
+### Codes to load the package, build the plots and combine in multiple plots.
+library(ggplot2)
+p3 <- ggplot(storm_property_dam[1:10, ], aes(x = reorder(EVENT_TYPE, PROPERTY_DAMAGES), y = PROPERTY_DAMAGES))+
+        geom_bar(stat = "identity", fill = "#e2d675", colour = "#e2d675")+
+        coord_flip()+
+        labs(x = "Event Type", y = "Property Damages (in billions)", title = "Top Property Damages per Weather Events")
+
+p4 <- ggplot(storm_crop_dam[1:10, ], aes(x = reorder(EVENT_TYPE, CROP_DAMAGES), y = CROP_DAMAGES))+
+        geom_bar(stat = "identity", fill = "#75b0e2", colour = "#75b0e2")+
+        coord_flip()+
+        labs(x = "Event Type", y = "Crop Damages (in billions)", title = "Top Crop Damages per Weather Events")
+
+library(gridExtra)
+grid.arrange(p3, p4, ncol = 2)
+dev.copy(png, file="property_crop.png", height=680, width=1040)
+dev.off()
