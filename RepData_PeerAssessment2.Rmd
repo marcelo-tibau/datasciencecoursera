@@ -1,0 +1,129 @@
+---
+title: "Reproducible Research - Course Project 2"
+author: "Marcelo Tibau"
+date: "8 de agosto de 2016"
+output: html_document
+---
+
+# Reproducible Research - Course Project 2
+
+## Analysis of major weather events in the USA and the impacts regarding fatalities, injuries, property damages and crop damages
+
+### Synopsis
+The basic goal of this project is to explore the NOAA Storm Database and answer some basic questions about severe weather events. The questions are:
+
+1) Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+
+2) Across the United States, which types of events have the greatest economic consequences?
+
+The analysis shows that the most harmful type of weather events, whether it is fatal or the most woundable is 'Tornado'. In addition, 'Tornado' appears as the top property damage event as well, while 'Hail' seems to be the top crop damage event.In order to keep the reproducibility of this project, the analytic data and the codes are available as follows.
+
+## Question 1
+
+### Data Processing
+
+Code to download the dataset and save it at working directory:
+
+```{R}
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", "./repdata%2Fdata%2FStormData.csv.bz2")
+```
+
+Code to load the data:
+
+```{R}
+storm_data_full <- read.csv("repdata%2Fdata%2FStormData.csv.bz2")
+```
+
+Code to check the names of all columns:
+
+```{R}
+names(storm_data_full)
+```
+
+Code to create a new dataset optimized to answer both questions:
+
+```{R}
+storm_data_optim <- subset(storm_data_full, FATALITIES > 0 | INJURIES > 0 | PROPDMG > 0 | CROPDMG > 0, select = c(8, 23:28))
+```
+
+Codes to sum the fatalities per event type and order it by the number of deceased:
+
+```{R}
+storm_fatalities <- aggregate(FATALITIES ~ EVTYPE, data = storm_data_optim, sum, na.rm = TRUE)
+names(storm_fatalities) <- c("EVENT_TYPE", "FATALITIES")
+storm_fatalities <- storm_fatalities[order(-storm_fatalities$FATALITIES), ]
+```
+
+Codes to sum the injuries per event type and order it by the number of wounded:
+
+```{R}
+storm_injuries <- aggregate(INJURIES ~ EVTYPE, data = storm_data_optim, sum, na.rm = TRUE)
+names(storm_injuries) <- c("EVENT_TYPE", "INJURIES")
+storm_injuries <- storm_injuries[order(-storm_injuries$INJURIES), ]
+```
+
+### Results
+
+Codes to load the packages used, build the plots and combine them in multiple plots:
+
+```{R}
+library(ggplot2)
+p1 <- ggplot(storm_fatalities[1:10, ], aes(x = reorder(EVENT_TYPE, FATALITIES), y = FATALITIES))+
+        geom_bar(stat = "identity", fill = "#cd7dd4", colour = "#cd7dd4")+
+        coord_flip()+
+        labs(x = "Event Type", y = "Fatalities", title = "Most Fatal Weather Events")
+
+p2 <- ggplot(storm_injuries[1:10, ], aes(x = reorder(EVENT_TYPE, INJURIES), y = INJURIES))+
+        geom_bar(stat = "identity", fill = "#7dd4c3", colour = "#7dd4c3")+
+        coord_flip()+
+        labs(x = "Event Type", y = "Injuries", title = "Most Woundable Weather Events")
+
+library(gridExtra)
+grid.arrange(p1, p2, ncol = 2)
+```
+
+## Question 2
+
+### Data Processing
+
+Codes to sum the property damages per event type and order it by decreasing values:
+
+```{R}
+storm_property_dam <- aggregate(PROPDMG ~ EVTYPE, data = storm_data_optim, sum, na.rm = TRUE)
+names(storm_property_dam) <- c("EVENT_TYPE", "PROPERTY_DAMAGES")
+storm_property_dam <- storm_property_dam[order(-storm_property_dam$PROPERTY_DAMAGES), ]
+storm_property_dam$PROPERTY_DAMAGES <- storm_property_dam$PROPERTY_DAMAGES/10^6 
+```
+
+Codes to sum the crop damages per event type and order it by decreasing values:
+
+```{R}
+storm_crop_dam <- aggregate(CROPDMG ~ EVTYPE, data = storm_data_optim, sum, na.rm = TRUE)
+names(storm_crop_dam) <- c("EVENT_TYPE", "CROP_DAMAGES")
+storm_crop_dam <- storm_crop_dam[order(-storm_crop_dam$CROP_DAMAGES), ]
+storm_crop_dam$CROP_DAMAGES <- storm_crop_dam$CROP_DAMAGES/10^6
+```
+
+### Results
+
+Codes to load the packages used, build the plots and combine in multiple plots:
+
+```{R}
+library(ggplot2)
+p3 <- ggplot(storm_property_dam[1:10, ], aes(x = reorder(EVENT_TYPE, PROPERTY_DAMAGES), y = PROPERTY_DAMAGES))+
+        geom_bar(stat = "identity", fill = "#e2d675", colour = "#e2d675")+
+        coord_flip()+
+        labs(x = "Event Type", y = "Property Damages (in billions)", title = "Top Property Damages per Weather Events")
+
+p4 <- ggplot(storm_crop_dam[1:10, ], aes(x = reorder(EVENT_TYPE, CROP_DAMAGES), y = CROP_DAMAGES))+
+        geom_bar(stat = "identity", fill = "#75b0e2", colour = "#75b0e2")+
+        coord_flip()+
+        labs(x = "Event Type", y = "Crop Damages (in billions)", title = "Top Crop Damages per Weather Events")
+
+library(gridExtra)
+grid.arrange(p3, p4, ncol = 2)
+```
+
+## Analysis Conclusions
+'Tornados' are the most deadly events with as much as 5,633 fatalities and the most woundable event with more than 91,000 injuries. It caused the most significant economic damage in property as well, with losses over US$ 3 billion.  
+'Hail' appears as the cause of the most significant economic damage in crops, with a little over US$ 0.5 billion in losses. 
