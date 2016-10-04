@@ -29,4 +29,8 @@ hist(more_than_ten)
 # Years that Dimagg played in the ASG:
 dimag_years <- with(AllstarFull, yearID[playerID == "dimagjo01"])
 
+# All-Stars from the NY Yankees
+yankees_all_stars <- subset(AllstarFull, teamID == "NYA")
 
+# Teams with most All Stars
+big_ones <- names(which(table(AllstarFull$teamID) > 10))
