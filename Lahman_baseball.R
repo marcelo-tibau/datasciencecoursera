@@ -22,13 +22,11 @@ dimagg_appearances <- subset(AllstarFull, playerID == "dimagjo01")
 plot(density(player_appearances), main = "Apperances in All Star Games")
 rug(jitter(player_appearances))
 
+# players who has played in more than 10 ASGs
+more_than_ten <- player_appearances[player_appearances > 10]
+hist(more_than_ten)
+
+# Years that Dimagg played in the ASG:
+dimag_years <- with(AllstarFull, yearID[playerID == "dimagjo01"])
 
 
-
-
-
-# who has played in more than 10 ASGs?
-player_appearances[player_appearances > 10]
-hist(player_appearances[player_appearances > 10])
-# Hank Aaron's All-Star record:
-subset(AllstarFull, playerID == "aaronha01")
